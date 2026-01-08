@@ -4,7 +4,7 @@ import axios from "axios";
 
 const Signup = () => {
   const [form, setForm] = useState({
-    name: "",
+    username: "",   // changed from name to username as backend expects username
     email: "",
     password: "",
     role: "user",
@@ -18,7 +18,12 @@ const Signup = () => {
       alert("Signup successful! Please login.");
       navigate("/signin");
     } catch (err) {
-      alert("Signup failed. Try again.");
+      if (err.response && err.response.data && err.response.data.error) {
+        alert(`Signup failed: ${err.response.data.error}`);
+      } else {
+        alert("Signup failed. Try again.");
+      }
+      console.error("Signup error:", err);
     }
   };
 
@@ -40,10 +45,10 @@ const Signup = () => {
 
         <input
           type="text"
-          placeholder="Name"
+          placeholder="Username"
           className="w-full mb-3 p-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          value={form.username}
+          onChange={(e) => setForm({ ...form, username: e.target.value })}
           required
         />
 

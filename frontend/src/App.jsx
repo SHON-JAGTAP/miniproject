@@ -23,6 +23,11 @@ import Layout from "./pages/Layout"; // ✅ Import Layout
 import ViewProfile from "./pages/profile/ViewProfile";
 import EditProfile from "./pages/profile/EditProfile";
 import ChangePassword from "./pages/profile/ChangePassword";
+import TeamCreation from "./pages/turfinfo/teamcreation";
+import PlayerManagement from "./pages/PlayerManagement";
+import WeatherForecast from "./pages/WeatherForecast";
+import PricingTest from "./pages/PricingTest";
+import PaymentPage from "./pages/PaymentPage";
 
 
 
@@ -48,6 +53,11 @@ function App() {
         <Route path="/profile" element={<ViewProfile />} />
 <Route path="/profile/edit" element={<EditProfile />} />
 <Route path="/profile/change-password" element={<ChangePassword />} />
+        <Route path="/team-creation" element={<TeamCreation />} />
+        <Route path="/player-management" element={<PlayerManagement />} />
+        <Route path="/weather-forecast" element={<WeatherForecast />} />
+        <Route path="/pricing-test" element={<PricingTest />} />
+        <Route path="/payment" element={<PaymentPage />} />
 
         
 

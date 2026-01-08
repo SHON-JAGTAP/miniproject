@@ -112,6 +112,18 @@ const Navbar = () => {
             </li>
           )}
 
+          {/* Team Creation button */}
+          <li>
+            <NavLink
+              to="/team-creation"
+              className={({ isActive }) =>
+                `${navLinkBase} ${isActive ? navLinkActive : navLinkInactive}`
+              }
+            >
+              Team Creation
+            </NavLink>
+          </li>
+
           {/* Quick Links Dropdown */}
           {user && (
             <li className="relative">
@@ -141,6 +153,31 @@ const Navbar = () => {
                       FAQ on Turf
                     </NavLink>
                   </li>
+                  <li>
+                    <NavLink to="/team-creation" className="block px-4 py-3 hover:bg-blue-50 text-gray-700">
+                      Team Creation
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/player-management" className="block px-4 py-3 hover:bg-blue-50 text-gray-700">
+                      Player Management
+                    </NavLink>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => document.querySelector('.fixed.bottom-6.right-6').click()}
+                      className="block w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 text-gray-700 font-medium border-l-4 border-transparent hover:border-blue-500 transition-all"
+                    >
+                      🤖 Gemini AI Assistant
+                    </button>
+                  </li>
+                  {user?.role === "owner" && (
+                    <li>
+                      <NavLink to="/weather-forecast" className="block px-4 py-3 hover:bg-blue-50 text-gray-700">
+                        Weather Forecast
+                      </NavLink>
+                    </li>
+                  )}
                 </ul>
               )}
             </li>

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
-
 const Signin = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const { setUser } = useAuth();

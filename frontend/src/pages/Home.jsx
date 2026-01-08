@@ -6,6 +6,7 @@ import Poster from "../assets/Poster.jpg";
 import Blogs from "../pages/Blogs";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import WeatherWidget from "../components/Weather/WeatherWidget";
 
 const Home = () => {
   const { user } = useAuth();
@@ -67,6 +68,10 @@ const Home = () => {
       {/* Places, Banner, Blogs */}
       <div className="relative z-30 bg-white/90 backdrop-blur-md rounded-t-3xl shadow-2xl">
         <div className="max-w-7xl mx-auto px-6 py-14">
+          {/* Weather Widget */}
+          <div className="mb-8">
+            <WeatherWidget city="Mumbai" />
+          </div>
           <Places />
           <div className="my-12">
             <BannerImg img={Poster} />

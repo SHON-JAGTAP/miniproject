@@ -3,6 +3,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer"; // 👈 Import your footer
+import ChatBot from "../components/Chatbot/ChatBot";
 
 const Layout = () => {
   return (
@@ -14,6 +15,7 @@ const Layout = () => {
       </main>
 
       <Footer /> {/* 👈 Footer will now be visible on all pages */}
+      <ChatBot /> {/* 🤖 AI Chatbot available on all pages */}
     </div>
     
   );

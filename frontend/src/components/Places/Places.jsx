@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import Img1 from "../../assets/places/Cricket.jpg";
 import Img2 from "../../assets/places/Football.jpg";
 import Img3 from "../../assets/places/Hockey.jpg";
@@ -69,11 +70,26 @@ const Places = () => {
   const [places, setPlaces] = useState(defaultPlacesData);
 
   useEffect(() => {
-    const addedByOwner = JSON.parse(localStorage.getItem("turfList")) || [];
-    if (addedByOwner.length > 0) {
-      setPlaces([...defaultPlacesData, ...addedByOwner]);
-    }
+    fetchTurfs();
   }, []);
+
+  const fetchTurfs = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/turfs");
+      const backendTurfs = response.data.map(turf => ({
+        img: turf.img ? `http://localhost:5000${turf.img}` : Img1,
+        title: turf.title,
+        location: turf.location,
+        description: turf.description,
+        price: turf.price,
+        type: turf.type,
+        slug: turf.slug
+      }));
+      setPlaces([...defaultPlacesData, ...backendTurfs]);
+    } catch (error) {
+      console.error("Error fetching turfs:", error);
+    }
+  };
 
   return (
     <div className="bg-gray-100 pt-24 pb-10 ">

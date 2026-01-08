@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const AddTurf = () => {
   const [title, setTitle] = useState("");
@@ -9,59 +10,99 @@ const AddTurf = () => {
   const [price, setPrice] = useState("");
   const [type, setType] = useState("");
   const [slug, setSlug] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null);
   const [turfs, setTurfs] = useState([]);
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Load existing turfs from localStorage on mount
+  // Load existing turfs from backend on mount
   useEffect(() => {
-    const storedTurfs = JSON.parse(localStorage.getItem("turfList")) || [];
-    setTurfs(storedTurfs);
+    fetchTurfs();
   }, []);
+
+  const fetchTurfs = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/turfs`);
+      setTurfs(response.data);
+    } catch (error) {
+      setMessage("Error fetching turfs. Please try again.");
+    }
+  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImage(reader.result); // Base64 string
-    };
-    reader.readAsDataURL(file);
+    
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage("Image size must be less than 5MB");
+      return;
+    }
+    
+    if (!file.type.startsWith('image/')) {
+      setMessage("Please select a valid image file");
+      return;
+    }
+    
+    setImage(file);
+    setMessage("");
   };
 
-  const handleAddTurf = (e) => {
+  const handleAddTurf = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setMessage("");
 
-    const newTurf = {
-      id: Date.now(),
-      title,
-      location,
-      description,
-      price,
-      type,
-      slug,
-      img: image,
+    if (!image) {
+      setMessage("Please select an image");
+      setIsLoading(false);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("location", location);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("type", type);
+    formData.append("slug", slug);
+    formData.append("image", image);
+
+    try {
+      await axios.post(`${API_URL}/api/turfs`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       
-    };
+      setMessage("Turf added successfully!");
+      fetchTurfs();
 
-    const updatedTurfs = [...turfs, newTurf];
-    setTurfs(updatedTurfs);
-    localStorage.setItem("turfList", JSON.stringify(updatedTurfs));
-
-    // Reset form
-    setTitle("");
-    setLocation("");
-    setDescription("");
-    setPrice("");
-    setType("");
-    setSlug("");
-    setImage("");
+      setTitle("");
+      setLocation("");
+      setDescription("");
+      setPrice("");
+      setType("");
+      setSlug("");
+      setImage(null);
+    } catch (error) {
+      setMessage("Error adding turf. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDelete = (id) => {
-    const updated = turfs.filter((turf) => turf.id !== id);
-    setTurfs(updated);
-    localStorage.setItem("turfList", JSON.stringify(updated));
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this turf?")) {
+      return;
+    }
+    
+    try {
+      await axios.delete(`${API_URL}/api/turfs/${id}`);
+      setMessage("Turf deleted successfully!");
+      fetchTurfs();
+    } catch (error) {
+      setMessage("Error deleting turf. Please try again.");
+    }
   };
 
   return (
@@ -70,6 +111,12 @@ const AddTurf = () => {
         <h2 className="text-2xl font-bold mb-6 text-green-700 text-center">
           Add New Turf
         </h2>
+        
+        {message && (
+          <div className={`p-3 mb-4 rounded ${message.includes('Error') || message.includes('must') || message.includes('Please select') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+            {message}
+          </div>
+        )}
 
         <form
           onSubmit={handleAddTurf}
@@ -150,7 +197,7 @@ const AddTurf = () => {
             </div>
             {image && (
               <img
-                src={image}
+                src={URL.createObjectURL(image)}
                 alt="Preview"
                 className="mt-4 w-40 h-28 object-cover border rounded"
               />
@@ -159,9 +206,10 @@ const AddTurf = () => {
 
           <button
             type="submit"
-            className="bg-green-600 text-black px-5 py-2 rounded hover:bg-green-700"
+            disabled={isLoading}
+            className="bg-green-600 text-black px-5 py-2 rounded hover:bg-green-700 disabled:opacity-50"
           >
-            Add Turf
+            {isLoading ? "Adding..." : "Add Turf"}
           </button>
         </form>
 
@@ -178,7 +226,7 @@ const AddTurf = () => {
                 <div className="flex items-center gap-4">
                   {turf.img && (
                     <img
-                      src={turf.img}
+                      src={`${API_URL}${turf.img}`}
                       alt={turf.title}
                       className="w-20 h-16 object-cover rounded"
                     />

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import DynamicPricing from "../components/Pricing/DynamicPricing";
 
 // Default turf list
 const defaultTurfs = [
@@ -14,7 +16,13 @@ const defaultTurfs = [
 
 const BookNow = () => {
   const { user } = useAuth();
-  const [turf, setTurf] = useState(defaultTurfs[0].name);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const selectedTurf = location.state;
+  
+  const [turf, setTurf] = useState(
+    selectedTurf ? selectedTurf.title : defaultTurfs[0].name
+  );
   const [price, setPrice] = useState(0);
   const [date, setDate] = useState("");
   const [from, setFrom] = useState("");
@@ -22,10 +30,12 @@ const BookNow = () => {
   const [paid, setPaid] = useState(false);
   const [hours, setHours] = useState(0);
   const [error, setError] = useState("");
+  const [city, setCity] = useState("Mumbai");
+  const [timeSlot, setTimeSlot] = useState("morning");
 
   const [bookedSlots, setBookedSlots] = useState([]);
 
-  // Update price and hours
+  // Update price, hours, and time slot
   useEffect(() => {
     const selected = defaultTurfs.find((t) => t.name === turf);
     if (selected && from && to) {
@@ -37,6 +47,15 @@ const BookNow = () => {
         setHours(duration);
         setPrice(duration * selected.pricePerHour);
         setError("");
+        
+        // Set time slot based on from time
+        if (fromHour < 12) {
+          setTimeSlot("morning");
+        } else if (fromHour < 17) {
+          setTimeSlot("afternoon");
+        } else {
+          setTimeSlot("evening");
+        }
       } else {
         setHours(0);
         setPrice(0);
@@ -63,63 +82,7 @@ const BookNow = () => {
     fetchBookedSlots();
   }, [turf, date]);
 
-  const handlePayment = () => {
-    if (price <= 0) {
-      alert("⚠️ Please select a valid time range.");
-      return;
-    }
-    alert(`✅ Payment of ₹${price} successful!`);
-    setPaid(true);
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!paid) {
-      alert("⚠️ Please complete the payment first.");
-      return;
-    }
-
-    // Check for overlapping bookings
-    const isOverlap = bookedSlots.some((slot) => {
-      return (
-        (from >= slot.fromTime && from < slot.toTime) ||
-        (to > slot.fromTime && to <= slot.toTime) ||
-        (from <= slot.fromTime && to >= slot.toTime)
-      );
-    });
-
-    if (isOverlap) {
-      alert("❌ Selected slot overlaps with an existing booking. Please choose another slot.");
-      return;
-    }
-
-    const bookingData = {
-      userEmail: user.email,
-      userName: user.name || "Unknown",
-      turfName: turf,
-      date,
-      fromTime: from,
-      toTime: to,
-      paid: true,
-      status: "Pending",
-    };
-
-    try {
-      await axios.post("http://localhost:5000/api/bookings", bookingData);
-      alert("✅ Booking submitted successfully!");
-      setDate("");
-      setFrom("");
-      setTo("");
-      setPaid(false);
-      setHours(0);
-      setPrice(0);
-      setBookedSlots([]); // refresh
-    } catch (err) {
-      console.error("Booking error:", err);
-      alert("❌ Failed to book turf. Try again later.");
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 py-10">
@@ -127,7 +90,7 @@ const BookNow = () => {
         <h2 className="text-3xl font-bold text-center text-blue-700 mb-1">Book a Turf</h2>
         <p className="text-center text-gray-600 mb-6">Select your turf, time and pay</p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-5">
           <div>
             <label className="block text-sm font-medium mb-1">Select Turf</label>
             <select
@@ -153,6 +116,26 @@ const BookNow = () => {
               className="w-full border rounded px-4 py-2"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">City (for Weather Pricing)</label>
+            <select
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full border rounded px-4 py-2"
+            >
+              <option value="Mumbai">Mumbai</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Pune">Pune</option>
+              <option value="Bangalore">Bangalore</option>
+              <option value="Chennai">Chennai</option>
+              <option value="Kolkata">Kolkata</option>
+              <option value="Hyderabad">Hyderabad</option>
+              <option value="Ahmedabad">Ahmedabad</option>
+              <option value="Jaipur">Jaipur</option>
+              <option value="Lucknow">Lucknow</option>
+            </select>
           </div>
 
           <div className="flex gap-4">
@@ -186,6 +169,17 @@ const BookNow = () => {
             </div>
           )}
 
+          {/* Dynamic Pricing Widget */}
+          {turf && city && timeSlot && (
+            <div className="mt-4">
+              <DynamicPricing 
+                turfId="1759600312644" 
+                city={city} 
+                timeSlot={timeSlot} 
+              />
+            </div>
+          )}
+
           {/* Show already booked slots */}
           {bookedSlots.length > 0 && (
             <div className="text-sm text-red-600 mt-4">
@@ -200,26 +194,41 @@ const BookNow = () => {
             </div>
           )}
 
-          {!paid ? (
-            <button type="button" onClick={handlePayment} className="w-full bg-green-500 py-3 rounded text-black">
-              Pay ₹{price > 0 ? price : "?"}
-            </button>
-          ) : (
-            <div className="text-green-600 text-center font-semibold">✅ Payment Done</div>
-          )}
+
 
           <button
-            type="submit"
-            disabled={!paid || price <= 0}
+            type="button"
+            onClick={() => {
+              if (price <= 0) {
+                alert("⚠️ Please select a valid time range.");
+                return;
+              }
+              
+              const bookingData = {
+                userEmail: user.email,
+                userName: user.name || "Unknown",
+                turfName: turf,
+                date,
+                fromTime: from,
+                toTime: to,
+                hours,
+                amount: price,
+                city,
+                timeSlot
+              };
+              
+              navigate('/payment', { state: bookingData });
+            }}
+            disabled={price <= 0}
             className={`w-full py-3 rounded ${
-              paid && price > 0
-                ? "bg-blue-600 text-black"
-                : "bg-gray-300 text-black cursor-not-allowed"
+              price > 0
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            Confirm Booking
+            Proceed to Payment
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const PlacesCard = ({ img, title, location, description, price, type, slug }) => {
   return (
-    <Link to={`/turf/${slug}`}>
+    <Link to="/booking" state={{ img, title, location, description, price, type, slug }}>
       <div className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition">
         <img src={img} alt={title} className="w-full h-48 object-cover" />
         <div className="p-4">
