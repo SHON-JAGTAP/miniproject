@@ -2,8 +2,9 @@ services:
   - type: web
     name: turf-backend
     runtime: node
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -29,10 +30,11 @@ services:
   - type: web
     name: turf-frontend
     runtime: static
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/dist
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     routes:
-      - path: /
+      - path: /*
         destination: /index.html
 
 databases:
