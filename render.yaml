@@ -2,8 +2,9 @@ services:
   - type: web
     name: turf-backend
     runtime: node
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && node server.js
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -23,14 +24,19 @@ services:
         fromDatabase:
           name: turf-database
           property: database
+      - key: DB_PORT
+        value: "3306"
       - key: SESSION_SECRET
         sync: false
+      - key: PORT
+        value: "5000"
 
   - type: web
     name: turf-frontend
     runtime: static
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/dist
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     routes:
       - path: /*
         destination: /index.html
