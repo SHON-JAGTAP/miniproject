@@ -1,48 +1,43 @@
 services:
   - type: web
     name: turf-backend
-    runtime: node
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: node server.js
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    plan: standard
     envVars:
       - key: NODE_ENV
         value: production
       - key: DB_HOST
         fromDatabase:
-          name: turf-database
+          name: turf-db
           property: host
       - key: DB_USER
         fromDatabase:
-          name: turf-database
+          name: turf-db
           property: user
       - key: DB_PASS
         fromDatabase:
-          name: turf-database
+          name: turf-db
           property: password
       - key: DB_NAME
         fromDatabase:
-          name: turf-database
+          name: turf-db
           property: database
-      - key: DB_PORT
-        value: "3306"
       - key: SESSION_SECRET
-        sync: false
-      - key: PORT
-        value: "5000"
+        value: change-me-in-render-dashboard
 
   - type: web
     name: turf-frontend
-    runtime: static
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    plan: free
     routes:
       - path: /*
         destination: /index.html
 
 databases:
-  - name: turf-database
+  - name: turf-db
     databaseName: turfdb
     user: turfuser
-    region: oregon
