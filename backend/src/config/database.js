@@ -1,11 +1,17 @@
-require('dotenv').config(); // Load .env variables
-const mysql = require('mysql2/promise');
+require("dotenv").config();
+const mysql = require("mysql2/promise");
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
+
+  // ✅ FIX FOR SSL ERROR
+  ssl: {
+    rejectUnauthorized: false
+  },
+
   waitForConnections: true,
   connectionLimit: process.env.DB_CONNECTION_LIMIT || 10,
   queueLimit: 0,
