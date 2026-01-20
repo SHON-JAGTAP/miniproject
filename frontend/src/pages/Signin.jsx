@@ -11,7 +11,8 @@ const Signin = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5000/api/signin", form);
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const res = await axios.post(`${apiUrl}/api/signin`, form);
 
       if (res.data && res.data.user) {
         const userData = res.data.user;
