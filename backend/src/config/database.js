@@ -7,7 +7,6 @@ const pool = mysql.createPool({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
 
-  // ✅ FIX FOR SSL ERROR
   ssl: {
     rejectUnauthorized: false
   },
@@ -18,3 +17,4 @@ const pool = mysql.createPool({
 });
 
 module.exports = pool;
+
